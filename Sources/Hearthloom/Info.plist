@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>$(DEVELOPMENT_LANGUAGE)</string>
+	<key>CFBundleDisplayName</key>
+	<string>Hearthloom</string>
+	<key>CFBundleExecutable</key>
+	<string>$(EXECUTABLE_NAME)</string>
+	<key>CFBundleIdentifier</key>
+	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleName</key>
+	<string>$(PRODUCT_NAME)</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleShortVersionString</key>
+	<string>$(MARKETING_VERSION)</string>
+	<key>CFBundleVersion</key>
+	<string>$(CURRENT_PROJECT_VERSION)</string>
+	<key>HearthloomProviderName</key>
+	<string>$(HEARTHLOOM_PROVIDER_NAME)</string>
+	<key>HearthloomProviderURL</key>
+	<string>$(HEARTHLOOM_PROVIDER_URL)</string>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsLocalNetworking</key>
+		<true/>
+	</dict>
+	<key>NSAppleMusicUsageDescription</key>
+	<string>Hearthloom reads what you've played so your music and podcasts become a taste signal in your knowledge graph.</string>
+	<key>NSCalendarsFullAccessUsageDescription</key>
+	<string>Hearthloom reads your calendar so events, attendees, and places become part of your knowledge graph.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Hearthloom uses the camera to scan receipts, cards, and documents. Only the recognized text is sent to your node — never the images.</string>
+	<key>NSContactsUsageDescription</key>
+	<string>Hearthloom uses your contacts so the people in your knowledge graph resolve to the right person.</string>
+	<key>NSFaceIDUsageDescription</key>
+	<string>Hearthloom uses Face ID to unlock your device token and to authorize unlocking your private vault.</string>
+	<key>NSFocusStatusUsageDescription</key>
+	<string>Hearthloom records when a Focus (Work, Sleep, …) is on so it becomes part of your knowledge graph. Only the Focus name and times are sent to your node.</string>
+	<key>NSHealthShareUsageDescription</key>
+	<string>Hearthloom sends your health samples to your own Hearthloom node so your daily summaries live in your knowledge graph.</string>
+	<key>NSHealthUpdateUsageDescription</key>
+	<string>Hearthloom does not write to Apple Health.</string>
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>Hearthloom connects to your self-hosted node on your local network.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>Hearthloom records your arrivals and departures in the background so your place graph stays complete even when the app is closed. Only coordinates and times are sent to your node.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Hearthloom records the places you spend time so they become part of your personal place graph. Only coordinates and times are sent to your node.</string>
+	<key>NSMotionUsageDescription</key>
+	<string>Hearthloom reads your motion activity to record how you move through the day (walking, running, driving).</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Hearthloom reads where your photos were taken to add those places to your map. Only location, time, and filename are sent to your node — never the photos.</string>
+	<key>NSRemindersFullAccessUsageDescription</key>
+	<string>Hearthloom reads your reminders so they become tasks in your knowledge graph.</string>
+	<key>SENTRY_DSN</key>
+	<string>$(SENTRY_DSN)</string>
+	<key>UILaunchScreen</key>
+	<dict/>
+	<key>UISupportedInterfaceOrientations</key>
+	<array>
+		<string>UIInterfaceOrientationPortrait</string>
+		<string>UIInterfaceOrientationLandscapeLeft</string>
+		<string>UIInterfaceOrientationLandscapeRight</string>
+	</array>
+</dict>
+</plist>

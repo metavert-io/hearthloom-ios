@@ -1,0 +1,54 @@
+# Sentry APM overlay — OPT-IN, and NOT part of a default build.
+#
+# To enable Sentry:
+#   1. cp project.sentry.yml.example project.sentry.yml   (the copy is gitignored)
+#   2. paste your Sentry DSN below (Sentry → Project → Settings → Client Keys).
+#      The DSN is a client-side, send-only key; keeping it out of git is a
+#      convenience, not a security requirement.
+#   3. ./Scripts/generate.sh   (detects the overlay and layers it in)
+#
+# Without project.sentry.yml, the app builds with no Sentry package and no Sentry
+# code (Observability.swift is guarded by `#if canImport(Sentry)`), and the
+# SENTRY_DSN build setting is undefined so Info.plist's SENTRY_DSN resolves to ""
+# and APM stays off.
+packages:
+  Sentry:
+    url: https://github.com/getsentry/sentry-cocoa
+    from: "8.0.0"
+targets:
+  Hearthloom:
+    dependencies:
+      - package: Sentry
+    settings:
+      base:
+        # This flows into Info.plist's SENTRY_DSN (= "$(SENTRY_DSN)"), which
+        # Observability.start() reads at launch.
+        SENTRY_DSN: "YOUR_SENTRY_DSN_HERE"
+        # The dSYM-upload build phase must read .sentryclirc, the dSYM folder, and
+        # reach the network — all blocked by user-script sandboxing. Turn it off
+        # only when Sentry is active (the default build keeps it on).
+        ENABLE_USER_SCRIPT_SANDBOXING: "NO"
+      configs:
+        # Force dSYM generation for Debug too (default is dwarf-only), so crashes
+        # from the Debug builds you install to devices symbolicate in Sentry.
+        Debug:
+          DEBUG_INFORMATION_FORMAT: dwarf-with-dsym
+    # Uploads debug symbols after each build so crash stack traces are readable.
+    # No-ops gracefully if sentry-cli or .sentryclirc is absent. Requires:
+    #   brew install getsentry/tools/sentry-cli
+    #   cp .sentryclirc.example .sentryclirc   (then fill in your auth token)
+    postBuildScripts:
+      - name: "Upload dSYMs to Sentry"
+        basedOnDependencyAnalysis: false
+        script: |
+          if ! command -v sentry-cli >/dev/null 2>&1; then
+            echo "warning: sentry-cli not installed — skipping dSYM upload (brew install getsentry/tools/sentry-cli)"
+            exit 0
+          fi
+          cd "${SRCROOT}"   # so sentry-cli picks up .sentryclirc (auth token, org, project)
+          if [ ! -f .sentryclirc ]; then
+            echo "warning: .sentryclirc missing — skipping dSYM upload (copy .sentryclirc.example)"
+            exit 0
+          fi
+          sentry-cli debug-files upload --include-sources "${DWARF_DSYM_FOLDER_PATH}" \
+            || echo "warning: sentry-cli dSYM upload failed"

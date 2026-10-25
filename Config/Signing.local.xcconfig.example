@@ -1,0 +1,15 @@
+// Your signing settings. Copy this file to Signing.local.xcconfig (gitignored)
+// and replace the values. Signing.xcconfig includes it last, so it overrides
+// the committed defaults.
+//
+// Team ID: Xcode → Settings → Accounts, or developer.apple.com → Membership.
+// Bundle ID: any reverse-DNS ID you own; the extension and test targets append
+// .controls, .tests and .uitests to it.
+
+DEVELOPMENT_TEAM = ABCDE12345
+HEARTHLOOM_BUNDLE_ID = com.example.hearthloom
+
+// Optional: list a different hosted provider on the Connect screen, or hide
+// the option by setting the URL to nothing.
+// HEARTHLOOM_PROVIDER_NAME = Example Host
+// HEARTHLOOM_PROVIDER_URL = https:/$()/provider.example.com

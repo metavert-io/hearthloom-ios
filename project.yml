@@ -1,0 +1,154 @@
+name: Hearthloom
+options:
+  deploymentTarget:
+    iOS: "17.0"
+  createIntermediateGroups: true
+  developmentLanguage: en
+# Signing is per developer: Config/Signing.xcconfig holds the committed
+# defaults (no team, a placeholder bundle ID) and includes your gitignored
+# Config/Signing.local.xcconfig last. Keep DEVELOPMENT_TEAM and the bundle ID
+# out of `settings` below — project.yml settings override xcconfig values.
+configFiles:
+  Debug: Config/Signing.xcconfig
+  Release: Config/Signing.xcconfig
+settings:
+  base:
+    MARKETING_VERSION: "0.1.0"
+    CURRENT_PROJECT_VERSION: "1"
+    SWIFT_VERSION: "5.0"
+    CODE_SIGN_STYLE: Automatic
+    GENERATE_INFOPLIST_FILE: NO
+    ENABLE_USER_SCRIPT_SANDBOXING: YES
+targets:
+  Hearthloom:
+    type: application
+    platform: iOS
+    deploymentTarget: "17.0"
+    sources:
+      - path: Sources/Hearthloom
+      - path: Sources/Shared
+      - path: Resources/Assets.xcassets
+      # Privacy manifest: no tracking; UserDefaults read/written by this app
+      # only (CA92.1). The optional Sentry package ships its own manifest.
+      - path: Resources/PrivacyInfo.xcprivacy
+        buildPhase: resources
+    dependencies:
+      - sdk: HealthKit.framework
+      - target: HearthloomControls
+    entitlements:
+      path: Sources/Hearthloom/Hearthloom.entitlements
+      # Declared here so `xcodegen generate` writes it INTO the file every time
+      # (otherwise xcodegen owns the file and resets it to an empty <dict/>,
+      # silently stripping HealthKit — the 2026-07-28 regression).
+      properties:
+        com.apple.developer.healthkit: true
+    info:
+      path: Sources/Hearthloom/Info.plist
+      properties:
+        CFBundleDisplayName: Hearthloom
+        CFBundleShortVersionString: "$(MARKETING_VERSION)"
+        CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
+        UILaunchScreen: {}
+        UISupportedInterfaceOrientations:
+          - UIInterfaceOrientationPortrait
+          - UIInterfaceOrientationLandscapeLeft
+          - UIInterfaceOrientationLandscapeRight
+        # FaceID gate (app open + vault-unlock action).
+        NSFaceIDUsageDescription: "Hearthloom uses Face ID to unlock your device token and to authorize unlocking your private vault."
+        # App Transport Security: plain http only for local addresses — a node
+        # on your home network such as http://192.168.1.20:43278 or
+        # http://mynode.local. Every other host needs https. See README →
+        # Security posture.
+        NSAppTransportSecurity:
+          NSAllowsLocalNetworking: true
+        NSLocalNetworkUsageDescription: "Hearthloom connects to your self-hosted node on your local network."
+        # HealthKit (Track B / Phase 1): read-only, streamed to your node.
+        NSHealthShareUsageDescription: "Hearthloom sends your health samples to your own Hearthloom node so your daily summaries live in your knowledge graph."
+        NSHealthUpdateUsageDescription: "Hearthloom does not write to Apple Health."
+        # Photo LOCATIONS only (Track B / Phase 3) — never the images.
+        NSPhotoLibraryUsageDescription: "Hearthloom reads where your photos were taken to add those places to your map. Only location, time, and filename are sent to your node — never the photos."
+        # Tier 1 device adapters (contacts + calendar).
+        NSContactsUsageDescription: "Hearthloom uses your contacts so the people in your knowledge graph resolve to the right person."
+        NSCalendarsFullAccessUsageDescription: "Hearthloom reads your calendar so events, attendees, and places become part of your knowledge graph."
+        NSRemindersFullAccessUsageDescription: "Hearthloom reads your reminders so they become tasks in your knowledge graph."
+        NSMotionUsageDescription: "Hearthloom reads your motion activity to record how you move through the day (walking, running, driving)."
+        NSAppleMusicUsageDescription: "Hearthloom reads what you've played so your music and podcasts become a taste signal in your knowledge graph."
+        # Location / Visits adapter — CLVisit monitoring. "Always" lets visits record
+        # in the background (the system relaunches the app for visit events).
+        NSLocationWhenInUseUsageDescription: "Hearthloom records the places you spend time so they become part of your personal place graph. Only coordinates and times are sent to your node."
+        NSLocationAlwaysAndWhenInUseUsageDescription: "Hearthloom records your arrivals and departures in the background so your place graph stays complete even when the app is closed. Only coordinates and times are sent to your node."
+        # Vision-scan feature — the system document scanner (camera).
+        NSCameraUsageDescription: "Hearthloom uses the camera to scan receipts, cards, and documents. Only the recognized text is sent to your node — never the images."
+        # Focus adapter — INFocusStatusCenter.requestAuthorization CRASHES without
+        # this purpose string (the reconcile backstop; the Focus Filter intent
+        # itself needs no auth). Missing it caused a Connect crash 2026-08-18.
+        NSFocusStatusUsageDescription: "Hearthloom records when a Focus (Work, Sleep, …) is on so it becomes part of your knowledge graph. Only the Focus name and times are sent to your node."
+        # The hosted provider listed — never preselected — under "Hosted
+        # providers" on the Connect screen. Values come from Config/Signing.xcconfig
+        # (override in Config/Signing.local.xcconfig); an empty URL hides it.
+        HearthloomProviderName: "$(HEARTHLOOM_PROVIDER_NAME)"
+        HearthloomProviderURL: "$(HEARTHLOOM_PROVIDER_URL)"
+        # Sentry APM is OPT-IN via the gitignored `project.sentry.yml` overlay
+        # (see Scripts/generate.sh). This key reads the `SENTRY_DSN` build setting,
+        # which only exists when that overlay is present — so a default clone
+        # resolves it to "" and Sentry stays off. Never hardcode a DSN here.
+        SENTRY_DSN: "$(SENTRY_DSN)"
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: "$(HEARTHLOOM_BUNDLE_ID)"
+        TARGETED_DEVICE_FAMILY: "1,2"
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+    scheme:
+      testTargets:
+        - HearthloomTests
+        - HearthloomUITests
+      gatherCoverageData: true
+  # Lock Screen / Control Center control (iOS 18+; the app itself stays 17.0).
+  # It only hosts the control's label — the control's intent (Sources/Shared, in
+  # BOTH targets) opens the app, so this needs no App Group, keychain group, or
+  # any other entitlement.
+  HearthloomControls:
+    type: app-extension
+    platform: iOS
+    deploymentTarget: "18.0"
+    sources:
+      - path: Sources/HearthloomControls
+      - path: Sources/Shared
+    info:
+      path: Sources/HearthloomControls/Info.plist
+      properties:
+        CFBundleDisplayName: Hearthloom
+        CFBundleShortVersionString: "$(MARKETING_VERSION)"
+        CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.widgetkit-extension
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: "$(HEARTHLOOM_BUNDLE_ID).controls"
+        TARGETED_DEVICE_FAMILY: "1,2"
+        SKIP_INSTALL: YES
+  HearthloomTests:
+    type: bundle.unit-test
+    platform: iOS
+    deploymentTarget: "17.0"
+    sources:
+      - path: Tests/HearthloomTests
+    dependencies:
+      - target: Hearthloom
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: "$(HEARTHLOOM_BUNDLE_ID).tests"
+        GENERATE_INFOPLIST_FILE: YES
+  HearthloomUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    deploymentTarget: "17.0"
+    sources:
+      - path: Tests/HearthloomUITests
+    dependencies:
+      - target: Hearthloom
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: "$(HEARTHLOOM_BUNDLE_ID).uitests"
+        GENERATE_INFOPLIST_FILE: YES
+        TEST_TARGET_NAME: Hearthloom

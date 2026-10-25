@@ -1,0 +1,17 @@
+// Per-developer build settings, applied to every target via project.yml.
+//
+// The committed values build and run in the Simulator as they are. To sign
+// for a device, copy Signing.local.xcconfig.example to Signing.local.xcconfig
+// (gitignored) and set your own Team ID and bundle ID there; it is included
+// last, so anything in it overrides the values below.
+
+DEVELOPMENT_TEAM =
+HEARTHLOOM_BUNDLE_ID = org.example.hearthloom
+
+// The hosted provider listed (never preselected) under "Hosted providers" on
+// the Connect screen. Set HEARTHLOOM_PROVIDER_URL to nothing to hide it.
+// ("$()" keeps the "//" in the URL from starting an xcconfig comment.)
+HEARTHLOOM_PROVIDER_NAME = Hearthlaunch
+HEARTHLOOM_PROVIDER_URL = https:/$()/hearthlaunch.com
+
+#include? "Signing.local.xcconfig"

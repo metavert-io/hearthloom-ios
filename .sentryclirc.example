@@ -1,0 +1,15 @@
+# sentry-cli configuration for uploading dSYMs (readable crash stack traces).
+# Copy to `.sentryclirc` (gitignored) and fill in your values.
+#
+# The auth token IS a secret — do NOT commit it. Create one at:
+#   Sentry → Settings → Auth Tokens (org-level)
+#   with scopes: project:releases, project:write, org:read
+#
+# org/project are the slugs from your Sentry URL:
+#   https://<org-slug>.sentry.io/projects/<project-slug>/
+[auth]
+token=YOUR_SENTRY_AUTH_TOKEN
+
+[defaults]
+org=your-org-slug
+project=your-project-slug
