@@ -1,0 +1,52 @@
+# Generates the project with XcodeGen and runs the test scheme (unit tests
+# and the offline UI tests) on the iOS Simulator. No signing team is needed:
+# simulator builds sign to run locally. The live tests skip, because their
+# TEST_RUNNER_HLIOS_* variables are never set here.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Build and test (iOS Simulator)
+    runs-on: macos-26
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Install XcodeGen
+        env:
+          VERSION: 2.45.4
+          SHA256: 090ec29491aad50aec10631bf6e62253fed733c50f3aab0f5ffc86bc170bdbef
+        run: |
+          curl -sSfL -o "$RUNNER_TEMP/xcodegen.zip" \
+            "https://github.com/yonaskolb/XcodeGen/releases/download/${VERSION}/xcodegen.zip"
+          echo "${SHA256}  $RUNNER_TEMP/xcodegen.zip" | shasum -a 256 --check --strict
+          unzip -q "$RUNNER_TEMP/xcodegen.zip" -d "$RUNNER_TEMP"
+          echo "$RUNNER_TEMP/xcodegen/bin" >> "$GITHUB_PATH"
+      - name: Generate the Xcode project
+        run: ./Scripts/generate.sh
+      - name: Test
+        run: |
+          xcodebuild test -quiet \
+            -project Hearthloom.xcodeproj -scheme Hearthloom \
+            -destination 'platform=iOS Simulator,name=iPhone 17,OS=latest' \
+            -resultBundlePath "$RUNNER_TEMP/Tests.xcresult"
+      - name: Test summary
+        if: always()
+        run: |
+          xcrun xcresulttool get test-results summary --path "$RUNNER_TEMP/Tests.xcresult" \
+            | jq -r '"\(.result): \(.passedTests) passed, \(.failedTests) failed, \(.skippedTests) skipped of \(.totalTestCount)"' \
+            | tee -a "$GITHUB_STEP_SUMMARY"
