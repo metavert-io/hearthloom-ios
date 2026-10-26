@@ -108,3 +108,9 @@ Unit tests and the offline UI tests (`ConnectScreenUITests`,
 `CaptureControlUITests`) need no node. The live tests skip unless their
 environment variables are set — point them at a throwaway node, never one with
 data you care about.
+
+GitHub Actions runs this test scheme on the simulator, with no signing team,
+for every push to `main` and every pull request (`.github/workflows/ci.yml`;
+the job summary gives the passed/failed/skipped counts). CodeQL
+(`codeql.yml`) compiles the app again for Swift analysis and takes about 30
+minutes. Check `gh run list` after pushing.
