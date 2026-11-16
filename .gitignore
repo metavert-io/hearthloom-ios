@@ -20,7 +20,6 @@ Hearthloom.xcodeproj/
 # Secrets — never commit tokens or connection dumps
 *.pat
 secrets.local.*
-VIBECTL.md
 
 # Opt-in feature overlays for Scripts/generate.sh (local, per-developer).
 # The .example templates ARE committed; the live overlays are not.
